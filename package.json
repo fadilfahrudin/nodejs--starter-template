@@ -4,7 +4,9 @@
   "description": "Backend Starter Template with NodeJS + ExpressJS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "NODE_ENV=development nodemon index.js",
+    "start": "NODE_ENV=production nodemon index.js",
+    "test": "jest"
   },
   "author": "Fadil Fahruddin",
   "license": "ISC",
