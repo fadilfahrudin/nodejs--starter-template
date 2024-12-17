@@ -14,18 +14,38 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     name: {
       type: DataTypes.STRING,
+      allowNull: false
     },
     username: {
       type: DataTypes.STRING,
-      unique: true
+      unique: true,
+      allowNull: false
     },
     email: {
       type: DataTypes.STRING,
       unique: true,
+      allowNull: false,
       validate:{
         isEmail: true,
         
       }
+    },
+    password: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    refreshToken: {
+      type: DataTypes.TEXT
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+      defaultValue: new Date()
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+      defaultValue: new Date()
     }
   }, {
     sequelize,

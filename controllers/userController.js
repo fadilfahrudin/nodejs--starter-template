@@ -1,6 +1,8 @@
-const Model  = require('../models/index.js');
-const Users = Model.User;
+const { Users } = require('../models/index.js');
 
+const registration = async (req, res) => {
+    const {name, username, email, password, confirmPassword} = req.body
+}
 const getAllUsers = async (req, res) => {
     try {
         const users = await Users.findAll();
