@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    role:{
+      type: DataTypes.ENUM,
+      values: ['superadmin', 'admin', 'user'],
+      allowNull: false
+    },
     username: {
       type: DataTypes.STRING,
       unique: true,
@@ -27,12 +32,17 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate:{
         isEmail: true,
-        
       }
     },
     password: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    status:{
+      type: DataTypes.ENUM,
+      values: ['active', 'inactive'],
+      allowNull: false,
+      defaultValue: 'inactive'
     },
     refreshToken: {
       type: DataTypes.TEXT
@@ -40,12 +50,10 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: new Date()
     },
     updatedAt: {
       allowNull: false,
       type: DataTypes.DATE,
-      defaultValue: new Date()
     }
   }, {
     sequelize,
