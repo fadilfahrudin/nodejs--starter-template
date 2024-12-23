@@ -1,59 +1,47 @@
 const { Books } = require('../models/index.js');
-
-const getAllBooks = async (req, res) => {
+const { getAllBooks, getBookById, updateBook, deleteBook } = require("../services/bookServices.js");
+const { successResponse } = require('../helpers/responseHelper.js');
+const getAllBooksController = async (req, res, next) => {
     try {
-        const books = await Books.findAll();
-        res.json(books);
+        const { limit, offset, keywords } = req.query;
+        const data = await getAllBooks(limit, offset, keywords);
+        successResponse(res, "Success get all books", data);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
-const getBookById = async (req, res) => {
+const getBookByIdController = async (req, res, next) => {
     try {
-        const book = await Books.findByPk(req.params.id);
-        if (!book) {
-            res.status(404).json({ message: 'Book not found' });
-        } else {
-            res.json(book);
-        }
+        const data = await getBookById(req.params.id);
+        successResponse(res, "Success get book", data, 200);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
-const createBook = async (req, res) => {
+const createBookController = async (req, res, next) => {
     try {
         const book = await Books.create(req.body);
-        res.status(201).json(book);
+        successResponse(res, "Success create book", book, 201);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
-const updateBook = async (req, res) => {
+const updateBookController = async (req, res, next) => {
     try {
-        const book = await Books.findByPk(req.params.id);
-        if (!book) {
-            res.status(404).json({ message: 'Book not found' });
-        } else {
-            await book.update(req.body);
-            res.json(book);
-        }
+        const book = await updateBook(req.params.id, req.body);
+        successResponse(res, "Success update book", book, 200);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-const deleteBook = async (req, res) => {
+const deleteBookController = async (req, res, next) => {
     try {
-        const book = await Books.findByPk(req.params.id);
-        if (!book) {
-            res.status(404).json({ message: 'Book not found' });
-        } else {
-            await book.destroy();
-            res.status(204).json();
-        }
+        await deleteBook(req.params.id);
+        successResponse(res, "Success delete book", null, 200);
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-module.exports = { getAllBooks, getBookById, createBook, updateBook, deleteBook };
+module.exports = { getAllBooksController, getBookByIdController, createBookController, updateBookController, deleteBookController };

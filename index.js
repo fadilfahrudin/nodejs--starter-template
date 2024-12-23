@@ -1,26 +1,32 @@
 const express = require('express');
-require('dotenv').config();
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
+require('dotenv').config(); // Load environment variables
+const cookieParser = require('cookie-parser'); // Cookie parser middleware
+const cors = require('cors'); // CORS middleware
+const errorHandler = require('./middlewares/errorHandler.js'); // Global error handler
+const routers = require('./routes/index.js'); // All routes
 const app = express();
 const port = process.env.PORT;
-const routers = require('./routes/index.js');
 
-// Middleware untuk JSON
+// Middleware untuk JSON dan URL-encoded
 app.use(express.json());
-// Middleware untuk URL-encoded
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser)
-app.use(cors)
 
-// routes
-app.use(routers)
+// Middleware untuk cookie parser
+app.use(cookieParser());
+
+// Middleware untuk CORS
+app.use(cors());
+
+// Routes
+app.use(routers);
 app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-// end routes
+    res.send('Hello World!');
+});
 
+// Global Error Handler (letakkan setelah semua route)
+app.use(errorHandler);
+
+// Start server
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
-
+    console.log(`Example app listening on port ${port}`);
+});

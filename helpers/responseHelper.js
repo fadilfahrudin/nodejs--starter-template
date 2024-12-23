@@ -10,7 +10,7 @@ const errorResponse = (res, msg, errors = null, statusCode = 400) => {
     return res.status(statusCode).json({
         status: 'error',
         message: msg,
-        errors
+        error: process.env.NODE_ENV === "production" ? undefined : errors.stack,
     })
 }
 

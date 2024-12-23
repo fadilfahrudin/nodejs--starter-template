@@ -1,8 +1,10 @@
-const {errorResponse} = require('../helpers/responseHelper.js');
+const { errorResponse } = require('../helpers/responseHelper.js');
 
 const errorHandler = (error, req, res, next) => {
     console.error(error.stack);
-    errorResponse(res, 'Internal server error', {errors: error.message}, 500);
+    const statusCode = error.statusCode || 500;
+    const message = error.message || 'Internal server error'
+    errorResponse(res, message, error || null, statusCode);
 }
 
 module.exports = errorHandler
