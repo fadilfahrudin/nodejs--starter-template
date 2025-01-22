@@ -17,23 +17,29 @@ module.exports = {
       role:{
         type: Sequelize.ENUM,
         values: ['superadmin', 'admin', 'user'],
-        allowNull: false
+        allowNull: false,
+        validate:{
+          isIn: {
+            args: [['superadmin', 'admin', 'user']],
+            msg: 'Invalid role'
+          }
+        }
       },
       username: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        unique: true,
+        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false,
         unique: true,
+        allowNull: false,
         validate: {
-          isEmail: true
+          isEmail: true,
         }
       },
       password: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false
       },
       status:{
@@ -43,7 +49,7 @@ module.exports = {
         defaultValue: 'inactive'
       },
       refreshToken: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true
       },
       createdAt: {
@@ -52,6 +58,10 @@ module.exports = {
       },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE
+      },
+      deletedAt: {
+        allowNull: true,
         type: Sequelize.DATE
       }
     })

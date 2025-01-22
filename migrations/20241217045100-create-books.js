@@ -12,19 +12,51 @@ module.exports = {
       },
       title: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull:{
+            msg: "Title is required"
+          },
+          notEmpty:{
+            msg: "Title cannot be empty"
+          }
+        }
       },
       author: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull:{
+            msg: "Author is required"
+          },
+          notEmpty:{
+            msg: "Author cannot be empty"
+          }
+        }
       },
       publisher: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        validate:{
+          notNull:{
+            msg: "Publisher is required"
+          },
+          notEmpty:{
+            msg: "Publisher cannot be empty"
+          }
+        }
       },
       genre: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull:{
+            msg: "Genre is required"
+          },
+          notEmpty:{
+            msg: "Genre atleast one"
+          }
+        }
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +64,10 @@ module.exports = {
       },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE
+      },
+      deletedAt: {
+        allowNull: true,
         type: Sequelize.DATE
       }
     })

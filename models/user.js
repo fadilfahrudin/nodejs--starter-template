@@ -1,5 +1,5 @@
 'use strict';
-const { Model } = require('sequelize');
+const { Model, where } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasOne(models.Profile, {
+        foreignKey: 'userId',
+        as: 'profile',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
     }
   }
   User.init({
@@ -19,7 +25,13 @@ module.exports = (sequelize, DataTypes) => {
     role:{
       type: DataTypes.ENUM,
       values: ['superadmin', 'admin', 'user'],
-      allowNull: false
+      allowNull: false,
+      validate:{
+        isIn: {
+          args: [['superadmin', 'admin', 'user']],
+          msg: 'Invalid role'
+        }
+      }
     },
     username: {
       type: DataTypes.STRING,
@@ -45,7 +57,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'inactive'
     },
     refreshToken: {
-      type: DataTypes.TEXT
+      type: DataTypes.TEXT,
+      allowNull: true
     },
     createdAt: {
       allowNull: false,
@@ -57,7 +70,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
+    paranoid: true,
     modelName: 'User',
+    deletedAt: 'deletedAt',
+    hooks:{
+      async beforeDestroy(user){
+        const profile = await sequelize.models.Profile.findOne({
+          where:{
+            userId: user.id
+          }
+        })
+
+        if (profile){
+          await profile.destroy()
+        }
+      }
+    }
   });
   return User;
 };

@@ -48,9 +48,6 @@ exports.getBookById = async (id) => {
 
 exports.updateBook = async (id, data) => {
     const book = await this.getBookById(id);
-    if (!book) {
-        throw new AppError(`Book with id ${id} not found`, 404);
-    }
     await book.update(data);
     return book;
 }
