@@ -4,21 +4,27 @@
   "description": "Backend Starter Template with NodeJS + ExpressJS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "start": "cross-env NODE_ENV=production nodemon index.js",
+    "test": "jest"
   },
   "author": "Fadil Fahruddin",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.11.5",
     "sequelize": "^6.37.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
+    "cross-env": "^7.0.3",
     "globals": "^15.13.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.7",

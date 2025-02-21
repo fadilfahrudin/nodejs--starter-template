@@ -1,5 +1,5 @@
 'use strict';
-const { Model } = require('sequelize');
+const { Model, where } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -9,15 +9,83 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasOne(models.Profile, {
+        foreignKey: 'userId',
+        as: 'profile',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
     }
   }
   User.init({
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    email: DataTypes.STRING
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    role:{
+      type: DataTypes.ENUM,
+      values: ['superadmin', 'admin', 'user'],
+      allowNull: false,
+      validate:{
+        isIn: {
+          args: [['superadmin', 'admin', 'user']],
+          msg: 'Invalid role'
+        }
+      }
+    },
+    username: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+      validate:{
+        isEmail: true,
+      }
+    },
+    password: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    status:{
+      type: DataTypes.ENUM,
+      values: ['active', 'inactive'],
+      allowNull: false,
+      defaultValue: 'inactive'
+    },
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    }
   }, {
     sequelize,
+    paranoid: true,
     modelName: 'User',
+    deletedAt: 'deletedAt',
+    hooks:{
+      async beforeDestroy(user){
+        const profile = await sequelize.models.Profile.findOne({
+          where:{
+            userId: user.id
+          }
+        })
+
+        if (profile){
+          await profile.destroy()
+        }
+      }
+    }
   });
   return User;
 };
