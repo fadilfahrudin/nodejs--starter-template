@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 require("dotenv/config.js"); // Load environment variables
 const cookieParser = require('cookie-parser'); // Cookie parser middleware
 const cors = require('cors'); // CORS middleware
@@ -7,6 +8,12 @@ const routers = require('./routes/index.js'); // All routes
 const app = express();
 const port = process.env.PORT;
 
+const fs = require("fs");
+const path = require("path");
+
+const accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
+  flags: "a", // Tambahkan log baru tanpa menimpa log lama
+});
 
 // Middleware untuk JSON dan URL-encoded
 app.use(express.json());
@@ -32,6 +39,9 @@ app.use(cors({
     },
     credentials: true
 }));
+
+// Log
+app.use(morgan("combined", { stream: accessLogStream }));
 
 // Routes
 app.use(routers);
