@@ -10,26 +10,6 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true
       },
-      name:{
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      role:{
-        type: Sequelize.ENUM,
-        values: ['superadmin', 'admin', 'user'],
-        allowNull: false,
-        validate:{
-          isIn: {
-            args: [['superadmin', 'admin', 'user']],
-            msg: 'Invalid role'
-          }
-        }
-      },
-      username: {
-        type: Sequelize.STRING,
-        unique: true,
-        allowNull: false
-      },
       email: {
         type: Sequelize.STRING,
         unique: true,
@@ -47,6 +27,14 @@ module.exports = {
         values: ['active', 'inactive'],
         allowNull: false,
         defaultValue: 'inactive'
+      },
+      roleId:{
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Roles', // Nama tabel Role
+          key: 'id', // Kolom primary key Role
+        }
       },
       refreshToken: {
         type: Sequelize.TEXT,

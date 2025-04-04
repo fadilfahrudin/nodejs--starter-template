@@ -1,43 +1,25 @@
 'use strict';
-const { Model, where } = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      // "Setiap User memiliki satu Profile. Jika User dihapus, Profile yang terkait juga ikut terhapus."
       User.hasOne(models.Profile, {
         foreignKey: 'userId',
-        as: 'profile',
-        onDelete: 'CASCADE',
+        as: 'userProfile',
+        onDelete: 'CASCADE', // jika user dihapus, maka profile dihapus
         onUpdate: 'CASCADE'
-      })
+      });
+      // Setiap user dimiliki oleh satu role, jika role dihapus, user tetap ada
+      User.belongsTo(models.Role, {
+        foreignKey: 'roleId',
+        as: 'role',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      });
     }
   }
   User.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    role:{
-      type: DataTypes.ENUM,
-      values: ['superadmin', 'admin', 'user'],
-      allowNull: false,
-      validate:{
-        isIn: {
-          args: [['superadmin', 'admin', 'user']],
-          msg: 'Invalid role'
-        }
-      }
-    },
-    username: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false
-    },
     email: {
       type: DataTypes.STRING,
       unique: true,
@@ -56,6 +38,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'inactive'
     },
+    roleId: {  
+      type: DataTypes.INTEGER,
+      allowNull: true,  
+      references: {
+        model: 'Roles',
+        key: 'id'
+      }
+    },
     refreshToken: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -73,17 +63,13 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true,
     modelName: 'User',
     deletedAt: 'deletedAt',
-    hooks:{
-      async beforeDestroy(user){
-        const profile = await sequelize.models.Profile.findOne({
-          where:{
-            userId: user.id
-          }
-        })
-
-        if (profile){
-          await profile.destroy()
-        }
+    hooks: {
+      async beforeDestroy(user, options) {
+        // Soft delete Profile
+        await sequelize.models.Profile.update(
+          { deletedAt: new Date() }, 
+          { where: { userId: user.id } }
+        );
       }
     }
   });

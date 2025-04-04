@@ -4,23 +4,30 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Profile extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      // "Setiap Profile dimiliki oleh satu User. Jika User dihapus, Profile yang terkait juga ikut terhapus."
       Profile.belongsTo(models.User, {
         foreignKey: 'userId',
         as: 'user',
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE', // Jika user dihapus, profile dihapus
         onUpdate: 'CASCADE'
       })
     }
   }
   Profile.init({
-    profilePicture: DataTypes.TEXT
+    userId: { 
+      type: DataTypes.INTEGER,
+      allowNull: false, // Profile harus selalu memiliki user
+      references: {
+        model: 'Users', // Nama tabel User
+        key: 'id'
+      }
+    },
+    fullName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    profilePicture: DataTypes.TEXT,
   }, {
     paranoid: true,
     sequelize,

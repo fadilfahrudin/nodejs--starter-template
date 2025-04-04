@@ -1,15 +1,9 @@
 const Joi = require('joi');
 
 const createUserSchema = Joi.object({
-    name: Joi.string().required().messages({
-        'string.base': 'Name must be a string',
-        'any.required': 'Name is required'
-    }),
-    username: Joi.string().alphanum().min(6).max(30).required().messages({
-        'string.base': 'Username must be a string',
-        'string.min': 'Username must be at least {#limit} characters long',
-        'string.max': 'Username must be at most {#limit} characters long',
-        'any.required': 'Username is required'
+    fullname: Joi.string().pattern(/^(?!.*(<script|<\/script|javascript:|onerror=|onload=|eval\(|alert\()).*$/i).required().messages({
+        'string.base': 'Full Name must be a string',
+        'any.required': 'Full Name is required'
     }),
     email: Joi.string().email().required().messages({
         'string.base': 'Email must be a string',
@@ -24,10 +18,9 @@ const createUserSchema = Joi.object({
         'any.only': 'Confirm password must match the password.',
         'any.required': 'Confirm password is required.',
     }),
-    role: Joi.string().valid('superadmin', 'admin', 'user').required().messages({
-        'string.base': 'Role must be a string',
-        'any.only': 'Role must be one of [admin, or user]',
-        'any.required': 'Role is required'
+    roleId: Joi.number().integer().required().messages({
+        'string.base': 'Role Id must be a number',
+        'any.required': 'Role Id is required'
     })
 })
 
@@ -74,9 +67,10 @@ const userProfilSchema = Joi.object({
 })
 
 const loginSchema = Joi.object({
-    usernameOrEmail: Joi.string().required().messages({
-        'string.base': 'Username must be a string',
-        'any.required': 'Username is required'
+    email: Joi.string().email().required().messages({
+        'string.base': 'Email must be a string',
+        'string.email': 'Email must be a valid email address',
+        'any.required': 'Email is required'
     }),
     password: Joi.string().required().messages({
         'string.base': 'Password must be a string'

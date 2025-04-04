@@ -1,4 +1,4 @@
-const { User, Profile } = require('../models/index.js');
+const { User, Profile, Role } = require('../models/index.js');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -6,14 +6,14 @@ const AppError = require('../helpers/AppError.js');
 
 exports.createUser = async (data) => {
     // 1. deklarasi
-    const { name, username, email, password, confirm_password, role } = data
+    const { fullname, email, password, confirm_password, roleId } = data
     let userStatus = 'inactive'
 
     // 2. cari username dan email yang terdaftar
     const users = await User.findOne({
         where: {
             [Op.or]: [
-                { username },
+                // { username }, // jika menggunakan username
                 { email }
             ]
         }
@@ -32,36 +32,40 @@ exports.createUser = async (data) => {
     // 5. hash password
     const hashedPassword = bcrypt.hashSync(String(password), 10);
 
-    // 6. cari user yang memiliki role superadmin
-    const superAdmin = await User.findOne({
+    // 6. cari role id = superadmin
+    const roleSuperAdmin = await Role.findOne({
         where: {
-            role: 'superadmin'
+            name: 'superadmin'
         }
     })
 
-    // 7. jika superadmin tidak ada maka user status default active
+    // 7. cari user yang memiliki role superadmin
+    const superAdmin = await User.findOne({
+        where: {
+            roleId: roleSuperAdmin.id
+        }
+    })
+
+    // 8. jika superadmin tidak ada maka user status default active
     if (!superAdmin) {
-        if (role === 'superadmin') {
+        if (roleId === roleSuperAdmin.id) {
             userStatus = 'active'
         }
-    } else if (role === 'superadmin') {
-        // 8. throw error jika role sama dengan superadmin (superadmin hanya boleh 1 di tabel user)
+    } else if (roleId === roleSuperAdmin.id) {
+        // 9. throw error jika role sama dengan superadmin (superadmin hanya boleh 1 di tabel user)
         throw new AppError('Superadmin already exists', 400);
     }
 
-
-    // 9. create user
+    // 10. create user
     const user = await User.create({
-        name,
-        username,
         email,
         password: hashedPassword,
-        role,
+        roleId,
         status: userStatus
     })
 
-    // 10. create profile
-    await Profile.create({ userId: user.id })
+    // 11. create profile
+    await Profile.create({ userId: user.id, fullName: fullname })
 }
 
 exports.getUsers = async (limit = 10, offset = 0, keywords = "") => {
@@ -127,17 +131,10 @@ exports.updateUser = async (id, data) => {
 
 exports.loginUser = async (data) => {
     // 1. deklarasi
-    const { usernameOrEmail, password } = data
+    const { email, password } = data
 
     // 2. cari user
-    const user = await User.findOne({
-        where: {
-            [Op.or]: [
-                { username: usernameOrEmail },
-                { email: usernameOrEmail }
-            ]
-        }
-    })
+    const user = await User.findOne({ where: { email } })
 
     // 3. throw error jika user tidak ditemukan
     if (!user) throw new AppError('User not found', 404);

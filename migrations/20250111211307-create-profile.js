@@ -15,9 +15,11 @@ module.exports = {
         references: {
           model: 'Users', // Nama tabel User
           key: 'id', // Kolom primary key User
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        }
+      },
+      fullName: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       profilePicture: {
         type: Sequelize.TEXT
