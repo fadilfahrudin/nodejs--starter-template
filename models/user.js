@@ -50,6 +50,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    loginAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    lastLoginAttempt: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,

@@ -130,6 +130,10 @@ exports.updateUser = async (id, data) => {
 }
 
 exports.loginUser = async (data) => {
+    const MAX_ATTEMPTS = 3;
+    const LOCK_TIME_MINUTES = 10;
+
+
     // 1. deklarasi
     const { email, password } = data
 
@@ -142,24 +146,48 @@ exports.loginUser = async (data) => {
     // 4. throw error jika user status inactive
     if (user.status === 'inactive') throw new AppError('User is inactive', 400)
 
-    // 5. verifikasi password
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) throw new AppError('Password is incorrect', 400);
+    // 5. Cek apakah user terkunci karena terlalu banyak gagal login
+    const now = new Date();
+    if (
+        user.loginAttempts >= MAX_ATTEMPTS &&
+        user.lastLoginAttempt &&
+        now - user.lastLoginAttempt < LOCK_TIME_MINUTES * 60 * 1000
+    ) {
+        throw new AppError(
+            `Account locked. Please try again after ${LOCK_TIME_MINUTES} minutes.`,
+            429
+        );
+    }
 
-    // 6. Set Access Token
+    // 6. verifikasi password
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+        // Update percobaan login gagal
+        await user.update({
+            loginAttempts: user.loginAttempts + 1,
+            lastLoginAttempt: now
+        });
+        throw new AppError('Password is incorrect', 400)
+    };
+
+    // 7. Set Access Token
     const accessToken = jwt.sign({ id: user.id, username: user.username, email: user.email }, process.env.SECRET_TOKEN_KEY, {
         expiresIn: '20s'
     })
 
-    // 7. Set Refresh Token
+    // 8. Set Refresh Token
     const refreshToken = jwt.sign({ id: user.id, username: user.username }, process.env.REFRESH_TOKEN_KEY, {
         expiresIn: '1d'
     })
 
-    // 8. update refresh token
-    await user.update({ refreshToken })
+    // 9. Jika login berhasil, reset loginAttempts dan set refreshToken
+    await user.update({
+        refreshToken,
+        loginAttempts: 0,
+        lastLoginAttempt: null
+    });
 
-    // 9. return
+    // 10. return
     return {
         accessToken,
         refreshToken
