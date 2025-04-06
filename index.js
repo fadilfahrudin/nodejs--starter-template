@@ -8,6 +8,14 @@ const routers = require('./routes/index.js'); // All routes
 const app = express();
 const port = process.env.PORT;
 
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 menit
+    max: 100, // Maksimal 100 permintaan
+    message: 'Too many requests, please try again later.',
+});
+
 const fs = require("fs");
 const path = require("path");
 
@@ -42,6 +50,9 @@ app.use(cors({
 
 // Log
 app.use(morgan("combined", { stream: accessLogStream }));
+
+// Rate Limit
+app.use(limiter);
 
 // Routes
 app.use(routers);
